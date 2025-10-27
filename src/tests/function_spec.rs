@@ -5,7 +5,7 @@ use crate::{FunctionSpec, OutputMode};
 #[test]
 fn self_to_arg() {
     let spec: FunctionSpec = parse_quote! {
-        query(pub fn foo(self) -> i32, Strict)
+        query(pub fn foo(self) -> i32, return = Strict)
     };
     assert_eq!(spec, FunctionSpec {
         visibility: parse_quote! { pub },
@@ -18,7 +18,7 @@ fn self_to_arg() {
 #[test]
 fn arg_to_self() {
     let spec: FunctionSpec = parse_quote! {
-        query(pub fn from_foo(foo: i32) -> Self, Strict)
+        query(pub fn from_foo(foo: i32) -> Self, return = Strict)
     };
     assert_eq!(spec, FunctionSpec {
         visibility: parse_quote! { pub },
@@ -31,7 +31,7 @@ fn arg_to_self() {
 #[test]
 fn self_and_arg_to_arg() {
     let spec: FunctionSpec = parse_quote! {
-        query(pub fn check_foo(&self, foo: i32) -> Option<i32>, Option(foo))
+        query(pub fn check_foo(&self, foo: i32) -> Option<i32>, return = Option(foo))
     };
     assert_eq!(spec, FunctionSpec {
         visibility: parse_quote! { pub },

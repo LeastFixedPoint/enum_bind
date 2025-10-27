@@ -1,8 +1,8 @@
-use enum_bind::Query;
+use enum_bind::Bind;
 
 #[test]
 fn environments() {
-    #[derive(Query, Debug, PartialEq)]
+    #[derive(Bind, Debug, PartialEq)]
     #[query(fn by_data_realm(data_realm: &str) -> Vec<Self>, return = Vec)]
     #[query(fn get_all() -> Vec<Self>, return = Vec)]
     enum Environment {

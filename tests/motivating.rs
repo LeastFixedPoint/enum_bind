@@ -1,8 +1,8 @@
-use enum_bind::Query;
+use enum_bind::Bind;
 
 #[test]
 fn extract_key() {
-    #[derive(Query, Debug, PartialEq)]
+    #[derive(Bind, Debug, PartialEq)]
     #[query(fn a(&self) -> Option<i32>)]
     enum Enum {
         #[bind(a = 1)]
@@ -19,7 +19,7 @@ fn extract_key() {
 
 #[test]
 fn bidi_capture() {
-    #[derive(Query, Debug, PartialEq)]
+    #[derive(Bind, Debug, PartialEq)]
     #[query(fn a(&self) -> Option<i32>, return = Strict(a))]
     #[query(fn by_a(a: Option<i32>) -> Option<Self>)]
     enum Enum {
@@ -39,7 +39,7 @@ fn bidi_capture() {
 
 #[test]
 fn map_fields() {
-    #[derive(Query, Debug, PartialEq)]
+    #[derive(Bind, Debug, PartialEq)]
     #[query(fn name(&self) -> Option<&'static str>)]
     enum Declaration {
         Function { name: &'static str },
@@ -64,7 +64,7 @@ fn map_fields() {
 
 #[test]
 fn dispatch_and_map_input_to_different_fields() {
-    #[derive(Query, Debug, PartialEq)]
+    #[derive(Bind, Debug, PartialEq)]
     #[query(fn create(kind: &'static str, name: &'static str) -> Option<Self>)]
     #[query(fn name(&self) -> &'static str, return = Strict(name))]
     enum Declaration {

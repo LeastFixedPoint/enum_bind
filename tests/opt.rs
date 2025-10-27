@@ -1,8 +1,8 @@
-use enum_bind::Query;
+use enum_bind::Bind;
 
 #[test]
 fn opt_all_variants_have_column() {
-    #[derive(Query)]
+    #[derive(Bind)]
     #[query(fn a(&self) -> Option<i32>)]
     enum Enum {
         #[bind(a = 1)]
@@ -18,7 +18,7 @@ fn opt_all_variants_have_column() {
 
 #[test]
 fn variant_without_column() {
-    #[derive(Query)]
+    #[derive(Bind)]
     #[query(fn a(&self) -> Option<i32>)]
     enum Enum {
         #[bind(a = 1)]
@@ -33,7 +33,7 @@ fn variant_without_column() {
 
 #[test]
 fn field_as_column() {
-    #[derive(Query)]
+    #[derive(Bind)]
     #[query(fn a(&self) -> Option<i32>)]
     enum Enum {
         #[bind(a = 1)]
@@ -49,7 +49,7 @@ fn field_as_column() {
 
 #[test]
 fn opt_self_for_column() {
-    #[derive(Query, PartialEq, Debug)]
+    #[derive(Bind, PartialEq, Debug)]
     #[query(fn by_a(a: usize) -> Option<Self>)]
     enum Enum {
         #[bind(a = 1)]
@@ -65,7 +65,7 @@ fn opt_self_for_column() {
 
 #[test]
 fn opt_self_for_column_with_capture() {
-    #[derive(Query, PartialEq, Debug)]
+    #[derive(Bind, PartialEq, Debug)]
     #[query(fn by_a(a: usize) -> Option<Self>)]
     enum Enum {
         #[bind(a = 1)]

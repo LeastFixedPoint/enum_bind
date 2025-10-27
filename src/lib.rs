@@ -10,7 +10,7 @@ use syn::{
 #[cfg(test)]
 pub mod tests;
 
-#[proc_macro_derive(Query, attributes(query, bind))]
+#[proc_macro_derive(Bind, attributes(query, bind))]
 pub fn derive_query(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     impl_macro(&syn::parse(input).expect("Failed to parse macro input"))
         .unwrap_or_else(Error::into_compile_error)
@@ -18,7 +18,7 @@ pub fn derive_query(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 }
 
 fn impl_macro(ast: &syn::DeriveInput) -> Result<TokenStream> {
-    let Data::Enum(data_enum) = &ast.data else { panic!("#[derive(Query)] only applicable to enums") };
+    let Data::Enum(data_enum) = &ast.data else { panic!("#[derive(Bind)] only applicable to enums") };
 
     let mut cases = Vec::new();
     for variant in &data_enum.variants {
@@ -148,8 +148,8 @@ impl FunctionSpec {
         if self.signature.receiver().is_some() {
             let name = self.output_name();
             if !cases.iter().any(|r| r.has_binding(name)) {
-                return Err(Error::new_spanned(&name, format!(r#"Function "{function}" must return binding "{name}", \
-                                                                but no variant has that binding"#)));
+                return Err(Error::new_spanned(&name,
+                    format!(r#"Function "{function}" must return binding "{name}", but no variant has that binding"#)));
             }
         }
 
@@ -158,8 +158,8 @@ impl FunctionSpec {
             if self.output_mode == OutputMode::Strict
             && let Some(case) = cases.iter().find(|r| !r.has_binding(name)) {
                 let variant = &case.variant.ident;
-                return Err(Error::new_spanned(&name, format!(r#"Cannot determine what function "{function}" \
-                                                                should return for variant "{variant}""#)));
+                return Err(Error::new_spanned(&name,
+                    format!(r#"Cannot determine what function "{function}" should return for variant "{variant}""#)));
             }
         }
 
@@ -168,9 +168,9 @@ impl FunctionSpec {
                 let name = fn_arg_to_ident(input);
                 if let Some(case) = cases.iter().find(|r| !r.has_binding(name)) {
                     let variant = &case.variant.ident;
-                    return Err(Error::new_spanned(&name, format!(r#"Variant "{variant}" does not have binding \
-                                                                    "{name}", cannot determine when function \
-                                                                    "{function}" should return it"#)));
+                    return Err(Error::new_spanned(&name,
+                        format!(r#"Variant "{variant}" does not have binding "{name}", \
+                                   cannot determine when function "{function}" should return it"#)));
                 }
             }
         }
@@ -186,9 +186,9 @@ impl FunctionSpec {
                         None | Some(Binding::Field { .. }) => continue,
                         _ => {
                             let variant = &case.variant.ident;
-                            return Err(Error::new_spanned(ident, format!(r#"Argument "{ident}" in function \
-                                                                            "{function}" conflicts with a binding of \
-                                                                            the same name in variant "{variant}""#)));
+                            return Err(Error::new_spanned(ident,
+                                format!(r#"Argument "{ident}" in function "{function}"
+                                           conflicts with a binding of the same name in variant "{variant}""#)));
                         },
                     }
                 }
@@ -210,7 +210,7 @@ impl FunctionSpec {
                 quote! { self }
             }
         } else {
-            let arg_names: Vec<Ident> = self.signature.inputs.iter().map(fn_arg_to_ident).cloned().collect();
+            let arg_names: Vec<_> = self.signature.inputs.iter().map(fn_arg_to_ident).collect();
             quote! { (#(#arg_names),*) }
         }
     }

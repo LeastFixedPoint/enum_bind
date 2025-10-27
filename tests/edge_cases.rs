@@ -1,8 +1,8 @@
-use enum_bind::Query;
+use enum_bind::Bind;
 
 #[test]
 fn all_argument_binding_cases_create() {
-    #[derive(Query, Debug, PartialEq)]
+    #[derive(Bind, Debug, PartialEq)]
     #[query(fn create(x: i32) -> Vec<Self>, return = Vec)]
     enum Enum {
         #[bind(x = 1)]  Alpha,
@@ -20,7 +20,7 @@ fn all_argument_binding_cases_create() {
 
 #[test]
 fn all_argument_binding_cases_select() {
-    #[derive(Query, Debug, PartialEq)]
+    #[derive(Bind, Debug, PartialEq)]
     #[query(fn x(self) -> Option<i32>, return = Option)]
     enum Enum {
         #[bind(x = 1)]  Alpha,

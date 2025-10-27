@@ -1,8 +1,8 @@
-use enum_bind::Query;
+use enum_bind::Bind;
 
 #[test]
 fn all_variants_have_column() {
-    #[derive(Query)]
+    #[derive(Bind)]
     #[query(fn a(&self) -> i32, return = Strict)]
     enum Enum {
         #[bind(a = 1)]
@@ -18,7 +18,7 @@ fn all_variants_have_column() {
 
 #[test]
 fn column_from_field() {
-    #[derive(Query)]
+    #[derive(Bind)]
     #[query(fn a(&self) -> i32, return = Strict)]
     enum Enum {
         #[bind(a = 1)]
@@ -33,7 +33,7 @@ fn column_from_field() {
 
 #[test]
 fn expr_column() {
-    #[derive(Query)]
+    #[derive(Bind)]
     #[query(fn a(&self) -> i32, return = Strict)]
     enum Enum {
         #[bind(a = 1)]
@@ -49,7 +49,7 @@ fn expr_column() {
 
 #[test]
 fn expr_using_argument() {
-    #[derive(Query)]
+    #[derive(Bind)]
     #[query(fn a(&self, b: i32) -> Option<i32>, return = Option(a))]
     enum Enum {
         #[bind(a = b + 1)]
@@ -62,7 +62,7 @@ fn expr_using_argument() {
 
 #[test]
 fn skips_variants_without_column() {
-    #[derive(Query, PartialEq, Debug)]
+    #[derive(Bind, PartialEq, Debug)]
     #[query(fn by_a(a: i32) -> Option<Self>)]
     #[query(fn b(&self) -> Option<i32>, return = Option(b))]
     enum Enum {
