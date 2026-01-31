@@ -47,7 +47,7 @@ fn impl_macro(ast: &syn::DeriveInput) -> Result<TokenStream> {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-enum OutputMode { Option, Strict, Vec }
+enum OutputMode { Option, Strict, Unwrap, Vec }
 
 impl Parse for OutputMode {
     fn parse(input: ParseStream) -> Result<Self> {
@@ -55,8 +55,9 @@ impl Parse for OutputMode {
         match ident.to_string().as_str() {
             "Option" => Ok(OutputMode::Option),
             "Strict" => Ok(OutputMode::Strict),
+            "Unwrap" => Ok(OutputMode::Unwrap),
             "Vec" => Ok(OutputMode::Vec),
-            _ => Err(Error::new_spanned(ident, "Expected 'Option', 'Strict', or 'Vec'")),
+            _ => Err(Error::new_spanned(ident, "Expected 'Option', 'Strict', 'Unwrap', or 'Vec'")),
         }
     }
 }
@@ -73,6 +74,7 @@ impl FunctionSpec {
     fn gen_function(&self, cases: &Vec<Case>) -> Result<TokenStream> {
         let body = match self.output_mode {
             OutputMode::Strict => self.gen_body_strict(cases)?,
+            OutputMode::Unwrap => self.gen_body_unwrap(cases)?,
             OutputMode::Option => self.gen_body_option(cases)?,
             OutputMode::Vec => self.gen_body_vec(cases)?,
         };
@@ -94,6 +96,24 @@ impl FunctionSpec {
             let Some(output) = self.gen_output(case) else { continue; };
             arms.push(quote! { #pattern => #output } );
         }
+
+        let match_expr = &self.gen_match_expr();
+        Ok(quote! {
+            match #match_expr {
+                #(#arms),*
+            }
+        })
+    }
+
+    fn gen_body_unwrap(&self, cases: &Vec<Case>) -> Result<TokenStream> {
+        let mut arms = Vec::new();
+        for case in cases {
+            // TODO: Sink the wildcard/capturing patterns
+            let Some(pattern) = self.gen_pattern(case) else { continue; };
+            let Some(output) = self.gen_output(case) else { continue; };
+            arms.push(quote! { #pattern => #output } );
+        }
+        arms.push(quote! { value => panic!("Cannot determine what to return for value: {value:?}") });
 
         let match_expr = &self.gen_match_expr();
         Ok(quote! {
@@ -251,10 +271,11 @@ impl FunctionSpec {
         use OutputMode::*;
         
         match (output, &self.output_mode) {
-            (Some(output), Option)       => Some(quote! { Some( #output ) }),
-            (Some(output), Strict | Vec) => Some(output),
-            (None,         Option)       => Some(quote! { None }),
-            (None,         Strict | Vec) => None,
+            (Some(output), Option)                => Some(quote! { Some( #output ) }),
+            (Some(output), Strict | Unwrap | Vec) => Some(output),
+            (None,         Option)                => Some(quote! { None }),
+            (None,         Unwrap)                => Some(quote! { panic!("Cannot determine what to return for this variant") }),
+            (None,         Strict | Vec)          => None,
         }
     }
 
