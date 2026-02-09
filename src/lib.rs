@@ -82,6 +82,7 @@ impl FunctionSpec {
         let visibility = &self.visibility;
         let signature = &self.signature;
         Ok(quote! {
+            #[allow(unused_variables)]
             #visibility #signature {
                 #body
             }
